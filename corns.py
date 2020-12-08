@@ -1,14 +1,9 @@
-import os, shutil
 from keras import layers, models, optimizers
 from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing import image
 import matplotlib.pyplot as plt
-#from keras.applications import VGG16
 from keras.models import load_model 
 import numpy as np
-#!!!!!!!!!НЕОБХОДИМО ДЛЯ ВИЗУАЛИЗАЦИИ ФИЛЬТРОВ СЕТЕЙ
-import tensorflow as tf
-#tf.compat.v1.disable_eager_execution()
 
 train = '/home/dmitry/progi/corns/train/'
 validation = '/home/dmitry/progi/corns/validation/'
@@ -20,21 +15,16 @@ Proba = '/home/dmitry/progi/corns/train/proba.jpg'
 
 def build_model():
     model = models.Sequential()
-    model.add(layers.Conv2D(32, (3,3),activation = 'relu', input_shape = (150,150,3)))
-    model.add(layers.Conv2D(32, (3,3),activation='relu'))
+    model.add(layers.SeparableConv2D(32, (3,3),activation = 'relu', input_shape = (150,150,3)))
     model.add(layers.MaxPooling2D((2,2)))
-    model.add(layers.Conv2D(64, (3,3),activation = 'relu'))
-    model.add(layers.Conv2D(64, (3,3),activation='relu'))
+    model.add(layers.SeparableConv2D(64, (3,3),activation = 'relu'))
     model.add(layers.MaxPooling2D((2,2)))
-    model.add(layers.Conv2D(128, (3,3),activation = 'relu'))
-    model.add(layers.Conv2D(128, (3,3),activation='relu'))
+    model.add(layers.SeparableConv2D(128, (3,3),activation = 'relu'))
     model.add(layers.MaxPooling2D((2,2)))
-    model.add(layers.Conv2D(128, (3,3),activation = 'relu'))
-    model.add(layers.Conv2D(128, (3,3),activation='relu'))
+    model.add(layers.SeparableConv2D(128, (3,3),activation = 'relu'))
     model.add(layers.MaxPooling2D((2,2)))
     model.add(layers.Flatten())
     model.add(layers.Dropout(0.5))
-    #model.add(layers.Dense(1024, activation='relu'))
     model.add(layers.Dense(512, activation='relu'))
     model.add(layers.Dense(4, activation='softmax'))
     return model
@@ -62,7 +52,7 @@ def train_model(model, train_dir, validation_dir):
         steps_per_epoch=16, epochs=100,
         validation_data=validation_generator,
         validation_steps=5)
-    model.save('corns.h5')
+    model.save('corns_sep.h5')
     return history
 
 def show(history):
@@ -99,7 +89,7 @@ if Train_need:
     loss, acc = model.evaluate_generator(test_generator, steps = 5)
     print(acc)
 else:
-    model = load_model('corns.h5')
+    model = load_model('corns_sep.h5')
     img = image.load_img(Proba, target_size=(150,150))
     tensor = image.img_to_array(img)
     tensor = np.expand_dims(tensor, axis=0)
